@@ -6,7 +6,7 @@ import { clearCookie } from "../../../../utils/cookies";
 export default withSessionRoute(callbackHandler);
 
 async function callbackHandler(req: NextApiRequest, res: NextApiResponse) {
-  const state = req.query.state ?? null;
+  const state = (req.query.state as string) ?? null;
   const code = (req.query.code as string) ?? null;
   const storedState = req.cookies["spotify_auth_state"];
 
@@ -20,7 +20,7 @@ async function callbackHandler(req: NextApiRequest, res: NextApiResponse) {
     // clear auth state cookie
     clearCookie(res, "spotify_auth_state");
 
-    // fetch an access token using the code
+    // fetch user tokens using the code
     let response = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       body: new URLSearchParams({
@@ -31,7 +31,8 @@ async function callbackHandler(req: NextApiRequest, res: NextApiResponse) {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${Buffer.from(
-          `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+          `${process.env.SPOTIFY_CLIENT_ID!}:${process.env
+            .SPOTIFY_CLIENT_SECRET!}`
         ).toString("base64")}`,
       },
     });
